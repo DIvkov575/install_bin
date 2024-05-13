@@ -1,11 +1,9 @@
-use std::cmp::max_by_key;
 use std::error::Error;
 use std::fs;
 use std::fs::read_dir;
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 use std::process::Command;
-// use thiserror::Error;
-// use crate::MyError::{ReleaseDirDNE, WrongReleaseFiles};
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
@@ -62,16 +60,4 @@ pub fn get_binaries(release_dir: &Path) -> Result<Vec<String>, Box<dyn Error>> {
         .filter(|x| !x.starts_with("."))
         .collect()
     )
-// .for_each(|x| println!("{:?}", x));
 }
-
-
-
-// #[derive(Error, Debug)]
-// #[error("install_bin error")]
-// enum MyError {
-//     #[error("rust release target dir does not exist")]
-//     ReleaseDirDNE,
-//     #[error("Incorrect number of binaries within release target dir")]
-//     WrongReleaseFiles,
-// }
