@@ -21,11 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // ensure build target exists
         let status = Command::new("cargo").args(["build", "--release"]).status()?;
-        // let status = Command::new("cargo").args(["build", "--release", "-Ctarget-cpu=native"]).status()?;
         println!("Cargo project build w/ status {}", status);
-        // if !release_dir.exists() { Command::new("cargo").args(["build", "--release"]).output()?; }
-        // if !release_dir.exists() { return Err(ReleaseDirDNE.into()); }
-        // println!("Build release target dir exists");
 
         // get binary targets
         let bins = get_binaries(&release_dir)?;

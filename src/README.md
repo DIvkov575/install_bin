@@ -1,1 +1,0 @@
-macos cli tool to install recently compiled (rust) binaries
