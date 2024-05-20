@@ -23,19 +23,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         let status = Command::new("cargo").args(["build", "--release"]).status()?;
         println!("Cargo project build w/ status {}", status);
 
-        // get binary targets
-        let bins = get_binaries(&release_dir)?;
-
         // ensure only 1 was created
-        if args.len() > 1 { out_name = &args[1]; }
-        else { out_name = &bins[0] }
-        if bins.len() != 1 { return Err("Incorrect number of binaries within release target".into())}
+        let bins = get_binaries(&release_dir)?;
+        if args.len() > 1 { out_name = &args[1]; } else { out_name = &bins[0] }
+        if bins.len() != 1 { return Err("Incorrect number of binaries within release target".into()); }
         println!("Single target exists");
-
 
         // copy file
         let i_path = &release_dir.join(&bins[0]);
-        let o_path =  &usr_bins.join(out_name);
+        let o_path = &usr_bins.join(out_name);
         fs::copy(i_path, o_path)?;
         println!("{} copied to {}", i_path.to_str().unwrap(), o_path.to_str().unwrap());
     }
