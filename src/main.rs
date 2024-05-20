@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fs;
 use std::fs::read_dir;
-use std::path::{Path};
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 
@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
         let release_dir = Path::new("target").join("release");
-        let usr_bins = Path::new("/usr").join("local").join("bin");
+        let usr_bins = get_usr_bin()?;
 
         // ensure build target exists
         let status = Command::new("cargo").args(["build", "--release"]).status()?;
@@ -44,7 +44,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn get_binaries(release_dir: &Path) -> Result<Vec<String>, Box<dyn Error>> {
+fn get_binaries(release_dir: &Path) -> Result<Vec<String>, Box<dyn Error>> {
     Ok(read_dir(&release_dir).unwrap()
         .map(|x| x.unwrap().path())
         .filter(|x| x.is_file())
@@ -56,4 +56,12 @@ pub fn get_binaries(release_dir: &Path) -> Result<Vec<String>, Box<dyn Error>> {
         .filter(|x| !x.starts_with("."))
         .collect()
     )
+}
+
+fn get_usr_bin() -> Result<PathBuf, Box<dyn Error>> {
+    let usr_bin = Path::new("/usr").join("local").join("bin");
+    if !usr_bin.exists() || !usr_bin.is_dir() {
+        fs::create_dir(&usr_bin)?
+    }
+    Ok(usr_bin)
 }
