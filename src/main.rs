@@ -7,17 +7,24 @@ use std::process::Command;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
+    let usr_bins = get_usr_bin()?;
     let out_name;
 
+    if args.len() < 2 {
+        println!("Insufficient args: please specify 'rust' / 'bin'");
+        std::process::exit(1);
+    }
+
     // if rust project
-    if read_dir(".").unwrap()
-        .map(|x| x.unwrap().file_name())
-        .any(|x| x == "Cargo.toml") {
+    if args[1].to_lowercase() == "rust" {
+        assert!(read_dir(".").unwrap()
+            .map(|x| x.unwrap().file_name())
+            .any(|x| x == "Cargo.toml"));
+
         println!("Cargo project detected");
 
 
         let release_dir = Path::new("target").join("release");
-        let usr_bins = get_usr_bin()?;
 
         // ensure build target exists
         let status = Command::new("cargo").args(["build", "--release"]).status()?;
@@ -25,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // ensure only 1 was created
         let bins = get_binaries(&release_dir)?;
-        if args.len() > 1 { out_name = &args[1]; } else { out_name = &bins[0] }
+        if args.len() > 2 { out_name = &args[2]; } else { out_name = &bins[0] }
         if bins.len() != 1 { return Err("Incorrect number of binaries within release target".into()); }
         println!("Single target exists");
 
@@ -34,6 +41,24 @@ fn main() -> Result<(), Box<dyn Error>> {
         let o_path = &usr_bins.join(out_name);
         fs::copy(i_path, o_path)?;
         println!("{} copied to {}", i_path.to_str().unwrap(), o_path.to_str().unwrap());
+
+    // if install binary
+    } else if args[1].to_lowercase() == "bin"{
+        // arg[1] = exec type
+        // arg[2] = input name
+        // arg[3] = Option(output name)
+        assert!(args.len() >= 3usize);
+        println!("Executing in bin mode");
+
+        // copy file
+        let i_path = Path::new(&args[2]);
+        let o_path = &usr_bins.join(if args.len() >= 4
+                {&args[3]} else
+                {i_path.file_name().unwrap().to_str().unwrap()});
+        fs::copy(i_path, o_path)?;
+        println!("{} copied to {}", i_path.to_str().unwrap(), o_path.to_str().unwrap());
+    } else {
+        println!("unrecognized input arg[1]");
     }
 
 
